@@ -23,16 +23,57 @@ COMMUNITY_LINK = "https://t.me/+5JrSHhoH1jw3MjIx"
 COURSES = {
     "البرمجة": [
         {"name": "C++ أسامة زيرو", "url": "https://t.me/c/2651762294/961"},
-        {"name": "C++ عبد الرحمن المجيد", "url": "https://t.me/c/2651762294/1956"},
+        {"name": "Python أسامة زيرو", "url": "https://t.me/c/2651762294/806"},
         {"name": "C++ جمال تك", "url": "https://t.me/c/2651762294/675"},
     ],
-    "الأمن السيبراني": [
-        {"name": "EJPTv2 أحمد سلطان (كامل)", "url": "https://t.me/c/2651762294/1730"},
-        {"name": "EWPTv2 أحمد سلطان", "url": "https://t.me/c/2651762294/160"},
-        {"name": "Social Engineering مترجم", "url": "https://t.me/c/2651762294/3727"},
-        {"name": "Zsecurity Social Engineering 2024", "url": "https://t.me/c/2651762294/3334"},
-        {"name": "Zsecurity Bug Bounty 2024", "url": "https://t.me/c/2651762294/3106"},
-        {"name": "Zsecurity Ethical Hacking 2024", "url": "https://t.me/c/2651762294/2491"},
+    
+    "الأمن السيبراني الأساسي": [
+        {"name": "اختراق اخلاقي من الصفر", "url": "https://t.me/c/2651762294/528"},
+        {"name": "كيف ابدا في الامن السيبراني", "url": "https://t.me/c/2651762294/334"},
+        {"name": "Linux+", "url": "https://t.me/c/2651762294/411"},
+    ],
+    
+    "الأمن السيبراني المتقدم": [
+        {"name": "صانع برامج الاختراق", "url": "https://t.me/c/2651762294/1176"},
+        {"name": "اختراق المواقع واكتشاف الثغرات", "url": "https://t.me/c/2651762294/319"},
+        {"name": "تطوير المالوير من الصفر", "url": "https://t.me/c/2651762294/319"},
+        {"name": "كورس Red Team مميز", "url": "https://t.me/c/2651762294/652"},
+    ],
+    
+    "كورسات مخصصة": [
+        {"name": "حسام شادي - BUG BOUNTY", "url": "https://t.me/c/2651762294/700"},
+        {"name": "حسام شادي - دبلومة RED TEAM", "url": "https://t.me/c/2651762294/1350"},
+        {"name": "نت رايدر - EWPTV2", "url": "https://t.me/c/2651762294/160"},
+        {"name": "نت رايدر - ECPPTV2", "url": "https://t.me/c/2651762294/3"},
+        {"name": "نت رايدر - Security+", "url": "https://t.me/c/2651762294/437"},
+        {"name": "سيف مخارزة - اختبار اختراق متقدم", "url": "https://t.me/c/2651762294/669"},
+        {"name": "ايهاب ابو عليا - Active Directory", "url": "https://t.me/c/2651762294/1532"},
+    ],
+    
+    "شهادات معتمدة": [
+        {"name": "EJPTv2 أحمد سلطان", "url": "https://t.me/c/2651762294/1730"},
+        {"name": "EJPTv2 نت رايدر", "url": "https://t.me/c/2651762294/1730"},
+        {"name": "Security+", "url": "https://t.me/c/2651762294/437"},
+        {"name": "MCSA محمد زهدي", "url": "https://t.me/c/2651762294/337"},
+    ],
+    
+    "تطوير البرمجيات": [
+        {"name": "FLEXCOURSES - Python", "url": "https://t.me/c/2651762294/695"},
+        {"name": "علوم الحاسوب - حسوب", "url": "https://t.me/c/2651762294/656"},
+    ],
+    
+    "كورسات Zsecurity": [
+        {"name": "Bug Bounty 2024", "url": "https://t.me/c/2651762294/3106"},
+        {"name": "Ethical Hacking 2024", "url": "https://t.me/c/2651762294/2491"},
+        {"name": "Social Engineering 2024", "url": "https://t.me/c/2651762294/3334"},
+    ],
+    
+    "مهارات تطويرية": [
+        {"name": "اللغة الإنجليزية - عبد الرحمن حجازي", "url": "https://t.me/c/2651762294/322"},
+    ],
+    
+    "تطوير المالوير": [
+        {"name": "MALDEVACADEMY", "url": "https://t.me/c/2651762294/794"},
     ]
 }
 
@@ -47,8 +88,23 @@ async def is_member(user_id, bot):
 async def show_main_menu(update: Update, is_callback: bool = False):
     keyboard = [
         [
-            InlineKeyboardButton("🧑💻 كورسات البرمجة", callback_data="programming"),
-            InlineKeyboardButton("🛡️ كورسات الأمن السيبراني", callback_data="cybersecurity")
+            InlineKeyboardButton("🧑💻 البرمجة", callback_data="programming"),
+            InlineKeyboardButton("🛡️ أساسيات الأمن", callback_data="cybersecurity")
+        ],
+        [
+            InlineKeyboardButton("🔐 الأمن المتقدم", callback_data="advanced_cyber"),
+            InlineKeyboardButton("🕵️ كورسات مخصصة", callback_data="special_courses")
+        ],
+        [
+            InlineKeyboardButton("📜 شهادات معتمدة", callback_data="certifications"),
+            InlineKeyboardButton("🦠 تطوير المالوير", callback_data="malware_dev")
+        ],
+        [
+            InlineKeyboardButton("🛠️ تطوير البرمجيات", callback_data="software_dev"),
+            InlineKeyboardButton("🔍 Zsecurity", callback_data="zsecurity")
+        ],
+        [
+            InlineKeyboardButton("🚀 مهارات تطويرية", callback_data="skills")
         ],
         [InlineKeyboardButton("👉 انضم هنا أولاً", url=COMMUNITY_LINK)]
     ]
@@ -56,7 +112,7 @@ async def show_main_menu(update: Update, is_callback: bool = False):
     text = (
         "🌟 *مرحبا بك في بوت كورسات مجتمع التقنية!* 🌟\n"
         "▬▬▬▬▬▬▬▬▬▬▬▬▬\n"
-        "اختر نوع الكورسات:"
+        "اختر القسم المطلوب:"
     )
     
     if is_callback:
@@ -85,7 +141,7 @@ async def show_courses(update: Update, context: ContextTypes.DEFAULT_TYPE, cours
             "ثم اضغط تحديث:",
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("🔄 تأكيد الانضمام", callback_data="verify")]
-            ]),  # تم إصلاح القوس هنا
+            ]),
             parse_mode="Markdown"
         )
         return
@@ -106,7 +162,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await show_main_menu(update)
     else:
         await update.message.reply_text(
-            "مرحبا! للوصول للكورات يجب الانضمام للمجموعة أولاً:",
+            "مرحبا! للوصول للكورسات يجب الانضمام للمجموعة أولاً:",
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("انضم للمجموعة هنا", url=COMMUNITY_LINK)],
                 [InlineKeyboardButton("✅ تأكيد الانضمام", callback_data="verify")]
@@ -122,9 +178,24 @@ async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await verify_membership(update, context)
         elif data == "main":
             await show_main_menu(update, is_callback=True)
-        elif data in ["programming", "cybersecurity"]:
-            category = "البرمجة" if data == "programming" else "الأمن السيبراني"
-            await show_courses(update, context, category)
+        elif data == "programming":
+            await show_courses(update, context, "البرمجة")
+        elif data == "cybersecurity":
+            await show_courses(update, context, "الأمن السيبراني الأساسي")
+        elif data == "advanced_cyber":
+            await show_courses(update, context, "الأمن السيبراني المتقدم")
+        elif data == "special_courses":
+            await show_courses(update, context, "كورسات مخصصة")
+        elif data == "certifications":
+            await show_courses(update, context, "شهادات معتمدة")
+        elif data == "malware_dev":
+            await show_courses(update, context, "تطوير المالوير")
+        elif data == "software_dev":
+            await show_courses(update, context, "تطوير البرمجيات")
+        elif data == "zsecurity":
+            await show_courses(update, context, "كورسات Zsecurity")
+        elif data == "skills":
+            await show_courses(update, context, "مهارات تطويرية")
     except Exception as e:
         logger.error(f"خطأ في التعامل مع الأوامر: {str(e)}")
         await query.answer("حدث خطأ، حاول مرة أخرى!", show_alert=True)
