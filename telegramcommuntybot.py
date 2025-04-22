@@ -6,7 +6,9 @@ from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
     ContextTypes,
-    CallbackQueryHandler
+    CallbackQueryHandler,
+    MessageHandler,
+    filters
 )
 
 # إعدادات التسجيل
@@ -20,213 +22,177 @@ TOKEN = '8146396115:AAGcO5Z7kTLQp4Hl9sjMHlzE-OWXYQjcZtY'
 COMMUNITY_CHAT_ID = -1002651762294
 COMMUNITY_LINK = "https://t.me/+5JrSHhoH1jw3MjIx"
 
+class BotStats:
+    def __init__(self):
+        self.total_users = 0
+        self.course_clicks = {}
+
+stats = BotStats()
+
+# تعريف الدورات بحسب الأقسام
 COURSES = {
-    "البرمجة": [
-        {"name": "C++ أسامة زيرو", "url": "https://t.me/c/2651762294/961"},
-        {"name": "Python أسامة زيرو", "url": "https://t.me/c/2651762294/806"},
-        {"name": "C++ جمال تك", "url": "https://t.me/c/2651762294/675"},
-    ],
-    
-    "الأمن السيبراني الأساسي": [
-        {"name": "اختراق اخلاقي من الصفر", "url": "https://t.me/c/2651762294/528"},
-        {"name": "كيف ابدا في الامن السيبراني", "url": "https://t.me/c/2651762294/334"},
-        {"name": "Linux+", "url": "https://t.me/c/2651762294/411"},
-    ],
-    
-    "الأمن السيبراني المتقدم": [
+    "كورسات صحيح": [
         {"name": "صانع برامج الاختراق", "url": "https://t.me/c/2651762294/1176"},
+        {"name": "اختراق اخلاقي من الصفر", "url": "https://t.me/c/2651762294/528"},
         {"name": "اختراق المواقع واكتشاف الثغرات", "url": "https://t.me/c/2651762294/319"},
-        {"name": "تطوير المالوير من الصفر", "url": "https://t.me/c/2651762294/319"},
-        {"name": "كورس Red Team مميز", "url": "https://t.me/c/2651762294/652"},
+        {"name": "تطوير المالوير من الصفر", "url": "https://t.me/c/2651762294/794"},
     ],
-    
-    "كورسات مخصصة": [
-        {"name": "حسام شادي - BUG BOUNTY", "url": "https://t.me/c/2651762294/700"},
-        {"name": "حسام شادي - دبلومة RED TEAM", "url": "https://t.me/c/2651762294/1350"},
-        {"name": "نت رايدر - EWPTV2", "url": "https://t.me/c/2651762294/160"},
-        {"name": "نت رايدر - ECPPTV2", "url": "https://t.me/c/2651762294/3"},
-        {"name": "نت رايدر - Security+", "url": "https://t.me/c/2651762294/437"},
-        {"name": "سيف مخارزة - اختبار اختراق متقدم", "url": "https://t.me/c/2651762294/669"},
-        {"name": "ايهاب ابو عليا - Active Directory", "url": "https://t.me/c/2651762294/1532"},
+    "كورسات حسام شادي RED NEXUS": [
+        {"name": "BUG BOUNTY اكتشاف الثغرات", "url": "https://t.me/c/2651762294/700"},
+        {"name": "دبلومة RED TEAM", "url": "https://t.me/c/2651762294/1350"},
+        {"name": "LINUX+", "url": "https://t.me/c/2651762294/411"},
     ],
-    
-    "شهادات معتمدة": [
-        {"name": "EJPTv2 أحمد سلطان", "url": "https://t.me/c/2651762294/1730"},
-        {"name": "EJPTv2 نت رايدر", "url": "https://t.me/c/2651762294/1730"},
+    "كورسات اسامة زيرو البرمجة": [
+        {"name": "Python", "url": "https://t.me/c/2651762294/806"},
+        {"name": "C++", "url": "https://t.me/c/2651762294/961"},
+    ],
+    "كورسات نت رايدر": [
+        {"name": "EWPTV2", "url": "https://t.me/c/2651762294/160"},
+        {"name": "ECPPTV2", "url": "https://t.me/c/2651762294/3"},
         {"name": "Security+", "url": "https://t.me/c/2651762294/437"},
-        {"name": "MCSA محمد زهدي", "url": "https://t.me/c/2651762294/337"},
+        {"name": "EJPTV2", "url": "https://t.me/c/2651762294/1730"},
     ],
-    
-    "تطوير البرمجيات": [
-        {"name": "FLEXCOURSES - Python", "url": "https://t.me/c/2651762294/695"},
-        {"name": "علوم الحاسوب - حسوب", "url": "https://t.me/c/2651762294/656"},
+    "كورسات FLEXCOURSES": [
+        {"name": "Python", "url": "https://t.me/c/2651762294/695"},
     ],
-    
-    "كورسات Zsecurity": [
-        {"name": "Bug Bounty 2024", "url": "https://t.me/c/2651762294/3106"},
-        {"name": "Ethical Hacking 2024", "url": "https://t.me/c/2651762294/2491"},
-        {"name": "Social Engineering 2024", "url": "https://t.me/c/2651762294/3334"},
+    "كورسات سيف مخارزة": [
+        {"name": "اختبار اختراق متقدم", "url": "https://t.me/c/2651762294/669"},
+        {"name": "اختراق مواقع", "url": "https://t.me/hackingchannelcol/1203"},
     ],
-    
-    "مهارات تطويرية": [
-        {"name": "اللغة الإنجليزية - عبد الرحمن حجازي", "url": "https://t.me/c/2651762294/322"},
+    "اكاديمية حسوب": [
+        {"name": "علوم الحاسوب", "url": "https://t.me/c/2651762294/656"},
+        {"name": "الذكاء الاصطناعي", "url": "https://t.me/c/2651762294/8484"},
+        {"name": "تطوير واجهات الويب", "url": "https://t.me/c/2651762294/10551"},
+        {"name": "PHP", "url": "https://t.me/c/2651762294/18500"},
+        {"name": "بايثون - أكاديمية حسوب", "url": "https://t.me/c/2651762294/20668"},
     ],
-    
-    "تطوير المالوير": [
+    "كورسات محمد زهدي": [
+        {"name": "MCSA", "url": "https://t.me/c/2651762294/337"},
+    ],
+    "كورسات جمال تك": [
+        {"name": "C++", "url": "https://t.me/c/2651762294/675"},
+    ],
+    "كورسات تطوير المالوير والفايروسات": [
         {"name": "MALDEVACADEMY", "url": "https://t.me/c/2651762294/794"},
-    ]
+    ],
+    "كورسات ايهاب ابو عليا": [
+        {"name": "Ejptv2", "url": "https://t.me/c/2651762294/1053"},
+        {"name": "Active Directory", "url": "https://t.me/c/2651762294/1532"},
+    ],
+    "كورسات Zsecurity (كلها 2024 ولله)": [
+        {"name": "Zsecurity Bug Bounty 2024", "url": "https://t.me/c/2651762294/3106"},
+        {"name": "Zsecurity Learn Ethical Hacking From Scratch 2024", "url": "https://t.me/c/2651762294/3106"},
+        {"name": "Zsecurity Social Engineering 2024", "url": "https://t.me/c/2651762294/3334"},
+    ],
+    "انظمة لينكس": [
+        {"name": "linux for hackers بالعربي", "url": "https://t.me/c/2651762294/6264"},
+        {"name": "فليكس كورس ادارة انظمة لينكس", "url": "https://t.me/c/2651762294/3469"},
+        {"name": "LINUX+ حسام شادي", "url": "https://t.me/c/2651762294/411"},
+    ],
+    "كورس ريد تيم مميز": [
+        {"name": "Red Team مميز", "url": "https://t.me/c/2651762294/652"},
+    ],
+    "كيف ابدا في الامن السيبراني": [
+        {"name": "كيف ابدا في الامن السيبراني", "url": "https://t.me/c/2651762294/334"},
+    ],
 }
 
-async def is_member(user_id, bot):
+# تجميع جميع الكورسات للبحث
+ALL_COURSES = []
+for lst in COURSES.values():
+    ALL_COURSES.extend(lst)
+
+async def is_member(user_id: int, bot) -> bool:
     try:
         member = await bot.get_chat_member(COMMUNITY_CHAT_ID, user_id)
-        return member.status not in [ChatMemberStatus.LEFT, ChatMemberStatus.BANNED]
+        return member.status not in (ChatMemberStatus.LEFT, ChatMemberStatus.BANNED)
     except Exception as e:
-        logger.error(f"خطأ في التحقق: {e}")
+        logger.error(f"خطأ في التحقق من العضوية: {e}")
         return False
 
 async def show_main_menu(update: Update, is_callback: bool = False):
-    keyboard = [
-        [
-            InlineKeyboardButton("🧑💻 البرمجة", callback_data="programming"),
-            InlineKeyboardButton("🛡️ أساسيات الأمن", callback_data="cybersecurity")
-        ],
-        [
-            InlineKeyboardButton("🔐 الأمن المتقدم", callback_data="advanced_cyber"),
-            InlineKeyboardButton("🕵️ كورسات مخصصة", callback_data="special_courses")
-        ],
-        [
-            InlineKeyboardButton("📜 شهادات معتمدة", callback_data="certifications"),
-            InlineKeyboardButton("🦠 تطوير المالوير", callback_data="malware_dev")
-        ],
-        [
-            InlineKeyboardButton("🛠️ تطوير البرمجيات", callback_data="software_dev"),
-            InlineKeyboardButton("🔍 Zsecurity", callback_data="zsecurity")
-        ],
-        [
-            InlineKeyboardButton("🚀 مهارات تطويرية", callback_data="skills")
-        ],
-        [InlineKeyboardButton("👉 انضم هنا أولاً", url=COMMUNITY_LINK)]
-    ]
-    
+    keyboard = [[InlineKeyboardButton(sec, callback_data=sec)] for sec in COURSES.keys()]
+    keyboard.append([InlineKeyboardButton("👉 انضم هنا أولاً", url=COMMUNITY_LINK)])
     text = (
         "🌟 *مرحبا بك في بوت كورسات مجتمع التقنية!* 🌟\n"
         "▬▬▬▬▬▬▬▬▬▬▬▬▬\n"
-        "اختر القسم المطلوب:"
+        "اختر القسم أو اكتب في القروب:\n"
+        "`بحث <اسم القسم أو الكورس>`"
     )
-    
+    reply_markup = InlineKeyboardMarkup(keyboard)
     if is_callback:
-        query = update.callback_query
-        await query.answer()
-        await query.edit_message_text(
-            text=text,
-            reply_markup=InlineKeyboardMarkup(keyboard),
-            parse_mode="Markdown"
-        )
+        q = update.callback_query
+        await q.answer()
+        await q.edit_message_text(text=text, reply_markup=reply_markup, parse_mode="Markdown")
     else:
-        await update.message.reply_text(
-            text=text,
-            reply_markup=InlineKeyboardMarkup(keyboard),
-            parse_mode="Markdown"
-        )
+        await update.message.reply_text(text=text, reply_markup=reply_markup, parse_mode="Markdown")
 
-async def show_courses(update: Update, context: ContextTypes.DEFAULT_TYPE, course_type: str):
-    query = update.callback_query
-    await query.answer()
-    
-    if not await is_member(query.from_user.id, context.bot):
-        await query.edit_message_text(
+async def show_courses(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    q = update.callback_query
+    section = q.data
+    await q.answer()
+    if not await is_member(q.from_user.id, context.bot):
+        await q.edit_message_text(
             "⚠️ *يجب الانضمام للمجموعة أولاً!*\n"
             f"انضم هنا: {COMMUNITY_LINK}\n"
             "ثم اضغط تحديث:",
-            reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("🔄 تأكيد الانضمام", callback_data="verify")]
-            ]),
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔄 تأكيد الانضمام", callback_data="show_main")]]),
             parse_mode="Markdown"
         )
         return
-    
-    courses = COURSES.get(course_type, [])
-    buttons = [[InlineKeyboardButton(c["name"], url=c["url"])] for c in courses]
-    buttons.append([InlineKeyboardButton("🔙 رجوع للقائمة الرئيسية", callback_data="main")])
-    
-    await query.edit_message_text(
-        f"📚 *كورسات {course_type}:*\n"
-        "▬▬▬▬▬▬▬▬▬▬▬▬▬",
-        reply_markup=InlineKeyboardMarkup(buttons),
-        parse_mode="Markdown"
-    )
+    buttons = [[InlineKeyboardButton(c["name"], url=c["url"])] for c in COURSES[section]]
+    buttons.append([InlineKeyboardButton("🔙 رجوع", callback_data="show_main")])
+    stats.course_clicks[section] = stats.course_clicks.get(section, 0) + 1
+    await q.edit_message_text(f"📚 *{section}*\n▬▬▬▬▬▬▬▬▬▬▬▬▬", reply_markup=InlineKeyboardMarkup(buttons), parse_mode="Markdown")
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if await is_member(update.effective_user.id, context.bot):
-        await show_main_menu(update)
+async def handle_search(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    text = update.message.text.strip()
+    if not text.startswith("بحث"):
+        return
+    term = text[4:].strip().lower()
+    reply_parts = []
+
+    # بحث في أسماء الأقسام
+    matched_sections = [sec for sec in COURSES.keys() if term in sec.lower()]
+    for sec in matched_sections:
+        reply_parts.append(f"📂 *{sec}*:")
+        for c in COURSES[sec]:
+            reply_parts.append(f"- [{c['name']}]({c['url']})")
+        reply_parts.append("")
+
+    # بحث في أسماء الكورسات
+    matched_courses = [c for c in ALL_COURSES if term in c["name"].lower()]
+    for c in matched_courses:
+        reply_parts.append(f"🔹 *{c['name']}*\n🔗 {c['url']}")
+        reply_parts.append("")
+
+    if not reply_parts:
+        reply = "❌ لم أتمكن من العثور على أي نتائج تطابق بحثك."
     else:
-        await update.message.reply_text(
-            "مرحبا! للوصول للكورسات يجب الانضمام للمجموعة أولاً:",
-            reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("انضم للمجموعة هنا", url=COMMUNITY_LINK)],
-                [InlineKeyboardButton("✅ تأكيد الانضمام", callback_data="verify")]
-            ])
-        )
+        reply = "\n".join(reply_parts).strip()
+
+    await update.message.reply_text(reply, parse_mode="Markdown", disable_web_page_preview=True)
 
 async def handle_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    data = query.data
-    
-    try:
-        if data == "verify":
-            await verify_membership(update, context)
-        elif data == "main":
-            await show_main_menu(update, is_callback=True)
-        elif data == "programming":
-            await show_courses(update, context, "البرمجة")
-        elif data == "cybersecurity":
-            await show_courses(update, context, "الأمن السيبراني الأساسي")
-        elif data == "advanced_cyber":
-            await show_courses(update, context, "الأمن السيبراني المتقدم")
-        elif data == "special_courses":
-            await show_courses(update, context, "كورسات مخصصة")
-        elif data == "certifications":
-            await show_courses(update, context, "شهادات معتمدة")
-        elif data == "malware_dev":
-            await show_courses(update, context, "تطوير المالوير")
-        elif data == "software_dev":
-            await show_courses(update, context, "تطوير البرمجيات")
-        elif data == "zsecurity":
-            await show_courses(update, context, "كورسات Zsecurity")
-        elif data == "skills":
-            await show_courses(update, context, "مهارات تطويرية")
-    except Exception as e:
-        logger.error(f"خطأ في التعامل مع الأوامر: {str(e)}")
-        await query.answer("حدث خطأ، حاول مرة أخرى!", show_alert=True)
-
-async def verify_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-    
-    if await is_member(query.from_user.id, context.bot):
+    data = update.callback_query.data
+    if data == "show_main":
         await show_main_menu(update, is_callback=True)
+    elif data in COURSES:
+        await show_courses(update, context)
     else:
-        await query.edit_message_text(
-            "❌ لم يتم التحقق بعد!\n"
-            "تأكد من:\n"
-            "1. الانضمام الفعلي للمجموعة\n"
-            "2. عدم استخدام حساب مخفي\n"
-            "3. الانتظار 10 ثواني بعد الانضمام",
-            reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("🔄 حاول مجدداً", callback_data="verify")],
-                [InlineKeyboardButton("الذهاب للمجموعة", url=COMMUNITY_LINK)]
-            ])
-        )
+        await update.callback_query.answer()
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    stats.total_users += 1
+    await show_main_menu(update)
 
 def main():
     app = ApplicationBuilder().token(TOKEN).build()
-    
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(handle_callbacks))
-    
+    app.add_handler(MessageHandler(filters.TEXT & filters.Regex(r"^بحث"), handle_search))
     logger.info("Bot is running...")
     app.run_polling()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
